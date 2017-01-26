@@ -34,14 +34,13 @@ diff -Naur a/icarus/GNUmakefile b/icarus/GNUmakefile
 diff -Naur a/nall/GNUmakefile b/nall/GNUmakefile
 --- a/nall/GNUmakefile	2016-12-30 03:11:39.000000000 -0200
 +++ b/nall/GNUmakefile	2017-01-25 12:25:25.535855835 -0200
-@@ -36,11 +36,16 @@
+@@ -36,11 +36,15 @@
    endif
  endif
  
 -cflags := -x c -std=c11
 +mycflags :=
 +mycxxflags :=
-+myflags :=
 +myldflags :=
 +
 +cflags := -x c -std=c11 $(mycflags)
@@ -49,8 +48,7 @@ diff -Naur a/nall/GNUmakefile b/nall/GNUmakefile
 -cppflags := -x c++ -std=c++14
 +cppflags := -x c++ -std=c++14 $(mycxxflags)
  objcppflags := -x objective-c++ -std=c++14
--flags :=
-+flags := $(myflags)
+ flags :=
 -link :=
 +link := $(myldflags)
  

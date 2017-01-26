@@ -4,18 +4,18 @@
 
 EAPI=6
 
-inherit eutils gnome2-utils toolchain-funcs qmake-utils
+inherit eutils gnome2-utils toolchain-funcs qmake-utils flag-o-matic
 
 MY_P=${PN}_v${PV}-source
 
 DESCRIPTION="A Nintendo multi-system emulator formerly known as bsnes"
-HOMEPAGE="https://byuu.org/emulation/higan/"
+HOMEPAGE="https://byuu.org/emulation/higan/ https://gitlab.com/higan/higan/"
 SRC_URI="https://download.byuu.org/${MY_P}.7z"
 
 LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64 ~x86"
-IUSE="ao +alsa +icarus openal opengl oss pulseaudio qt4 +sdl udev xv custom-cflags"
+IUSE="ao +alsa +icarus openal opengl oss pulseaudio qt4 +sdl udev xv custom-optimization"
 REQUIRED_USE="
 	|| ( ao openal alsa pulseaudio oss )
 	|| ( xv opengl sdl )
@@ -52,6 +52,12 @@ DEPEND="${RDEPEND}
 
 S="${WORKDIR}/${MY_P}"
 
+PATCHES=(
+	"${FILESDIR}"/${P}-QA.patch
+	"${FILESDIR}"/${P}-shared.patch
+	"${FILESDIR}"/${P}-install.patch
+)
+
 disable_module() {
 	sed -i \
 		-e "s|$1\b||" \
@@ -59,15 +65,11 @@ disable_module() {
 }
 
 src_prepare() {
-	epatch "${FILESDIR}"/${P}-QA.patch
-	epatch "${FILESDIR}"/${P}-shared.patch
-	epatch "${FILESDIR}"/${P}-install.patch
+	default
 
 	sed -i \
 		-e "/handle/s#/usr/local/lib#/usr/$(get_libdir)#" \
 		nall/dl.hpp || die "fixing libdir failed!"
-
-	eapply_user
 
 	# audio modules
 	use ao || disable_module audio.ao
@@ -94,19 +96,11 @@ src_prepare() {
 }
 
 src_compile() {
-	local mytoolkit oflags cflags cxxflags ldflags
+	local mytoolkit
 
-	# It is expected that CFLAGS and CXXFLAGS specify an optimization level
-	if use custom-cflags; then
-		oflags=""
-		cflags="${CFLAGS}"
-		cxxflags="${CXXFLAGS}"
-		ldflags="${LDFLAGS}"
-	else
-		oflags="-O3"
-		cflags=""
-		cxxflags=""
-		ldflags=""
+	if use !custom-optimization; then
+		filter-flags "-O?"
+		append-flags "-O3"
 	fi
 
 	if use qt4; then
@@ -119,9 +113,9 @@ src_compile() {
 	emake \
 		platform="linux" \
 		compiler="$(tc-getCXX)" \
-		myflags="${oflags}" \
-		mycflags="${cflags}" \
-		mycxxflags="${cxxflags}" \
+		mycflags="${CFLAGS}" \
+		mycxxflags="${CXXFLAGS}" \
+		myldflags="${LDFLAGS}" \
 		hiro="${mytoolkit}"
 
 	if use icarus; then
@@ -129,29 +123,28 @@ src_compile() {
 		emake \
 			platform="linux" \
 			compiler="$(tc-getCXX)" \
-			myflags="${oflags}" \
-			mycflags="${cflags}" \
-			mycxxflags="${cxxflags}"
+			mycflags="${CFLAGS}" \
+			mycxxflags="${CXXFLAGS}" \
+			myldflags="${LDFLAGS}"
 	fi
 }
 
 src_install() {
-	local myprefix="${D}usr"
 	dodir /usr/share/applications
 
 	cd "${S}/higan"
 	emake \
-		prefix="${myprefix}" \
+		prefix="${ED}/usr" \
 		install
 
 	# use our desktop entry
-	rm "${myprefix}/share/applications/${PN}.desktop"
+	rm "${ED}/usr/share/applications/${PN}.desktop"
 	make_desktop_entry "${PN}" "${PN}"
 
 	if use icarus; then
 		cd "${S}/icarus"
 		emake \
-			prefix="${myprefix}" \
+			prefix="${ED}/usr" \
 			install
 	fi
 }
