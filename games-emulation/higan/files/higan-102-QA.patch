@@ -1,0 +1,58 @@
+diff -Naur a/higan/GNUmakefile b/higan/GNUmakefile
+--- a/higan/GNUmakefile	2017-01-12 12:24:44.000000000 -0200
++++ b/higan/GNUmakefile	2017-01-25 12:19:20.751835348 -0200
+@@ -3,7 +3,7 @@
+ target := tomoko
+ # console := true
+ 
+-flags += -I. -I.. -O3
++flags += -I. -I..
+ objects := libco emulator audio video resource
+ 
+ # profile-guided optimization mode
+@@ -30,7 +30,7 @@
+ else ifeq ($(platform),macosx)
+   flags += -march=native
+ else ifneq ($(filter $(platform),linux bsd),)
+-  flags += -march=native -fopenmp
++  flags += -fopenmp
+   link += -fopenmp
+   link += -Wl,-export-dynamic
+   link += -lX11 -lXext
+diff -Naur a/icarus/GNUmakefile b/icarus/GNUmakefile
+--- a/icarus/GNUmakefile	2016-12-30 03:12:21.000000000 -0200
++++ b/icarus/GNUmakefile	2017-01-25 12:19:41.504925338 -0200
+@@ -2,7 +2,7 @@
+ include ../hiro/GNUmakefile
+ 
+ name := icarus
+-flags += -I.. -O3
++flags += -I..
+ link +=
+ 
+ ifeq ($(platform),windows)
+diff -Naur a/nall/GNUmakefile b/nall/GNUmakefile
+--- a/nall/GNUmakefile	2016-12-30 03:11:39.000000000 -0200
++++ b/nall/GNUmakefile	2017-01-25 12:25:25.535855835 -0200
+@@ -36,11 +36,16 @@
+   endif
+ endif
+ 
+-cflags := -x c -std=c11
++mycflags :=
++mycxxflags :=
++myflags :=
++myldflags :=
++
++cflags := -x c -std=c11 $(mycflags)
+ objcflags := -x objective-c -std=c11
+-cppflags := -x c++ -std=c++14
++cppflags := -x c++ -std=c++14 $(mycxxflags)
+ objcppflags := -x objective-c++ -std=c++14
+-flags :=
++flags := $(myflags)
+-link :=
++link := $(myldflags)
+ 
+ # compiler detection
+ ifeq ($(compiler),)
