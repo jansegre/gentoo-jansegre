@@ -1,0 +1,56 @@
+diff -Naur a/CMake/DefineOptions.cmake b/CMake/DefineOptions.cmake
+--- a/CMake/DefineOptions.cmake	2016-09-04 21:57:59.000000000 -0300
++++ b/CMake/DefineOptions.cmake	2017-01-25 20:30:11.783471861 -0200
+@@ -43,6 +43,11 @@
+ 
+ option(WITH_UNIT_TESTS "Build unit tests." OFF)
+ 
++option(WITH_ALSA "Enable ALSA sound" OFF)
++option(WITH_PULSEAUDIO "Enable PulseAudio sound" OFF)
++option(WITH_OSS "Enable OSS sound" OFF)
++option(WITH_JACK "Enable JACK sound" OFF)
++
+ if(NOT MSVC)
+   # Turn this option off to disable using FFMEPG.
+   option(WITH_FFMPEG "Build with FFMPEG." ON)
+diff -Naur a/StepmaniaCore.cmake b/StepmaniaCore.cmake
+--- a/StepmaniaCore.cmake	2016-09-04 21:57:59.000000000 -0300
++++ b/StepmaniaCore.cmake	2017-01-25 23:51:14.982344575 -0200
+@@ -367,29 +367,29 @@
+     set(HAS_XINERAMA FALSE)
+   endif()
+ 
+-  find_package(PulseAudio)
+-  if (PULSEAUDIO_FOUND)
++  if (WITH_PULSEAUDIO)
++    find_package(PulseAudio REQUIRED)
+     set(HAS_PULSE TRUE)
+   else()
+     set(HAS_PULSE FALSE)
+   endif()
+ 
+-  find_package(ALSA)
+-  if (ALSA_FOUND)
++  if (WITH_ALSA)
++    find_package(ALSA REQUIRED)
+     set(HAS_ALSA TRUE)
+   else()
+     set(HAS_ALSA FALSE)
+   endif()
+ 
+-  find_package(JACK)
+-  if (JACK_FOUND)
++  if (WITH_JACK)
++    find_package(JACK REQUIRED)
+     set(HAS_JACK TRUE)
+   else()
+     set(HAS_JACK FALSE)
+   endif()
+ 
+-  find_package(OSS)
+-  if (OSS_FOUND)
++  if (WITH_OSS)
++    find_package(OSS REQUIRED)
+     set(HAS_OSS TRUE)
+   else()
+     set(HAS_OSS FALSE)
